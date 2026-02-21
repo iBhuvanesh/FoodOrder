@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/api.service';
+import { AuthService } from '../core/auth.service';
 import { Cart } from '../core/models';
 
 @Component({
@@ -30,11 +31,13 @@ import { Cart } from '../core/models';
   `
 })
 export class CartComponent {
-  userId = 1;
+  userId = Number(localStorage.getItem('userId') || 1);
   cart: Cart | null = null;
   info = '';
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private auth: AuthService) {
+    this.userId = this.auth.userId() ?? this.userId;
+  }
 
   loadCart() {
     this.api.getCart(this.userId).subscribe({

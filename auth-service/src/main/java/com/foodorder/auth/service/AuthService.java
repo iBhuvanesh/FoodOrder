@@ -40,7 +40,7 @@ public class AuthService {
         userRepository.save(user);
         log.info("Registered new user: {} with role {}", user.getEmail(), user.getRole());
 
-        return new AuthResponse(jwtService.generateToken(user.getEmail(), user.getRole()), user.getEmail(), user.getRole().name());
+        return new AuthResponse(user.getId(), jwtService.generateToken(user.getEmail(), user.getRole()), user.getEmail(), user.getRole().name());
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -52,6 +52,6 @@ public class AuthService {
         }
 
         log.info("User logged in: {}", user.getEmail());
-        return new AuthResponse(jwtService.generateToken(user.getEmail(), user.getRole()), user.getEmail(), user.getRole().name());
+        return new AuthResponse(user.getId(), jwtService.generateToken(user.getEmail(), user.getRole()), user.getEmail(), user.getRole().name());
     }
 }

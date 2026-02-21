@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../core/api.service';
+import { AuthService } from '../core/auth.service';
 import { MenuItem, Restaurant } from '../core/models';
 
 @Component({
@@ -36,7 +37,7 @@ export class RestaurantListComponent implements OnInit {
   selectedRestaurantId: number | null = null;
   info = '';
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private auth: AuthService) {}
 
   ngOnInit(): void {
     this.api.getRestaurants().subscribe(res => this.restaurants = res);
@@ -48,7 +49,7 @@ export class RestaurantListComponent implements OnInit {
   }
 
   add(item: MenuItem) {
-    const userId = Number(localStorage.getItem('userId') || 1);
+    const userId = this.auth.userId() ?? 1;
     if (!this.selectedRestaurantId) return;
     this.api.addToCart({
       userId,
