@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+        - id: restaurant-service
+          uri: lb://restaurant-service
+          predicates:
+            - Path=/api/restaurants/**,/api/menu/**
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**,/api/cart/**
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:foodorder-local-dev-secret}

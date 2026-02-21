@@ -1,0 +1,141 @@
+version: '3.9'
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: foodorder-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  discovery-server:
+    build:
+      context: .
+      dockerfile: discovery-server/Dockerfile
+    ports:
+      - "8761:8761"
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka
+      DB_URL: jdbc:mysql://mysql:3306/foodorder_auth
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      JWT_SECRET: enterprise-demo-secret
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+
+  restaurant-service:
+    build:
+      context: .
+      dockerfile: restaurant-service/Dockerfile
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka
+      DB_URL: jdbc:mysql://mysql:3306/foodorder_restaurant
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+
+  order-service:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka
+      DB_URL: jdbc:mysql://mysql:3306/foodorder_order
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    ports:
+      - "8083:8083"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: payment-service/Dockerfile
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka
+      DB_URL: jdbc:mysql://mysql:3306/foodorder_payment
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    ports:
+      - "8085:8085"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-server:
+        condition: service_started
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka
+    ports:
+      - "8084:8084"
+    depends_on:
+      discovery-server:
+        condition: service_started
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka
+      JWT_SECRET: enterprise-demo-secret
+    ports:
+      - "8080:8080"
+    depends_on:
+      discovery-server:
+        condition: service_started
+      auth-service:
+        condition: service_started
+      restaurant-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+      payment-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "4200:80"
+    depends_on:
+      api-gateway:
+        condition: service_started
+
+volumes:
+  mysql_data:
