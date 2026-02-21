@@ -105,3 +105,14 @@ Endpoint:
 Endpoints:
 - `POST /api/payments`
 - `GET /api/payments/order/{orderId}`
+
+
+## Frontend (Angular)
+- Angular app added under `frontend/` with routes for login, restaurants, cart, orders, and payment lookup.
+- Uses API Gateway base URL `http://localhost:8080` from environment config.
+- Start with:
+  ```bash
+  cd frontend
+  npm install
+  npm start
+  ```
