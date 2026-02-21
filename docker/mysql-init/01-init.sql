@@ -1,0 +1,4 @@
+CREATE DATABASE IF NOT EXISTS foodorder_auth;
+CREATE DATABASE IF NOT EXISTS foodorder_restaurant;
+CREATE DATABASE IF NOT EXISTS foodorder_order;
+CREATE DATABASE IF NOT EXISTS foodorder_payment;
